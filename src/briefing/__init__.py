@@ -1,0 +1,1 @@
+from src.briefing.briefing_generator import generate_escalation_briefing
