@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Loan Application</title></head>
+<body>
+    <h2>Submit Application</h2>
+    <form id="intakeForm">
+        <label>Applicant Name:</label><input type="text" id="name"><br>
+        <label>Business Name:</label><input type="text" id="business"><br>
+        <label>Age:</label><input type="number" id="age"><br>
+        <label>Loan Amount:</label><input type="number" id="amount"><br>
+        <label>Purpose:</label>
+        <select id="purpose">
+            <option value="inventory">Inventory</option>
+            <option value="equipment">Equipment</option>
+            <option value="expansion">Expansion</option>
+            <option value="working capital">Working Capital</option>
+            <option value="other">Other</option>
+        </select><br>
+        <label>Notes:</label><textarea id="notes"></textarea><br>
+        <button type="button" onclick="submitForm()">Submit</button>
+    </form>
+    <script>
+        async function submitForm() {
+            const data = {
+                applicant_name: document.getElementById('name').value,
+                business_name: document.getElementById('business').value,
+                age: parseInt(document.getElementById('age').value),
+                loan_amount: parseFloat(document.getElementById('amount').value),
+                purpose: document.getElementById('purpose').value,
+                notes: document.getElementById('notes').value
+            };
+
+            // Webhook URL will be inserted here later
+            const webhookUrl = 'WEBHOOK_URL_PLACEHOLDER';
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(res => console.log('Sent!', res)).catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>
