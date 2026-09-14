@@ -23,6 +23,7 @@ from src.actions.letter_generator import (
 from src.actions.letter_validator import validate_letter
 from src.briefing.briefing_generator import generate_escalation_briefing
 from src.intake.pdf_extractor import extract_text_from_pdf
+from src.intake.date_validator import validate_operating_duration
 from config.thresholds import (
     AUTO_DECLINE_FAILED_CRITERIA_COUNT,
     AUTO_APPROVE_ALLOWED_RISK,
@@ -60,6 +61,15 @@ def process_application(
         elif intake_result.is_scanned:
             flags.append("SCANNED_DOCUMENT_REQUIRES_OCR")
 
+        # Cross-check extracted operating duration against source dates.
+    duration_validation = validate_operating_duration(record)
+
+    if (
+        duration_validation["was_checked"]
+        and not duration_validation["is_valid"]
+    ):
+        flags.append("OPERATING_DURATION_CONTRADICTION")
+
     # 2. Eligibility Evaluation
     eligibility: EligibilityAssessment = evaluate_all_eligibility(record)
 
@@ -73,8 +83,34 @@ def process_application(
     validation_result: Optional[LetterValidationResult] = None
     briefing_text = None
 
+        # Never act autonomously when source dates contradict the
+    # extracted operating duration.
+    if (
+        duration_validation["was_checked"]
+        and not duration_validation["is_valid"]
+    ):
+        status = "escalated"
+        ai_recommendation = (
+            "Escalated because the extracted operating duration "
+            "contradicts the verified source dates."
+        )
+
+        briefing = generate_escalation_briefing(
+            record,
+            eligibility,
+            risk,
+            unresolved_questions=[duration_validation["reason"]],
+            recommended_action=(
+                "Verify the business registration and bank-statement "
+                "date range before making a final decision."
+            ),
+        )
+        briefing_text = briefing.formatted_briefing_text
+
     # Check for document intake edge cases
-    if intake_result and (intake_result.is_corrupted or intake_result.is_scanned):
+    elif intake_result and (
+        intake_result.is_corrupted or intake_result.is_scanned
+    ):
         status = "escalated"
         ai_recommendation = f"Escalated due to document intake issue ({intake_result.extraction_status})."
         briefing = generate_escalation_briefing(
@@ -190,6 +226,7 @@ def process_application(
     return {
         "application_id": app_id,
         "status": status,
+        "duration_validation": duration_validation,
         "eligibility": eligibility.model_dump(),
         "risk": risk.model_dump(),
         "validation": validation_result.model_dump() if validation_result else None,
