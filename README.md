@@ -1,103 +1,103 @@
-# FlowMind: Intelligent Credit Workflow Automation with Human-in-the-Loop
+# FlowMind: Intelligent Credit Workflow Automation
 
-**Expadox Lab · AI Automation · Project 3**  
-**Client:** ClearPath Capital (Lagos, Nigeria)
+**Human-in-the-Loop Loan Processing Prototype**
 
-FlowMind is a production-grade credit underwriting and workflow automation system designed for microfinance institutions. It processes incoming small-business loan applications, autonomously approves or declines straightforward high-confidence cases, enforces deterministic anti-hallucination guardrails on all outgoing letters, and generates structured briefings for human loan officers on complex edge cases.
+**Expadox Lab - AI Automation - Project 3**
 
----
+**Fictional client: ClearPath Capital, Lagos, Nigeria**
 
-## 🚀 Key Features
+## Overview
 
-1. **Intake & Resilient Extraction**: PyMuPDF-based intake handling standard PDFs, flat-scanned image-only PDFs, and truncated byte streams without crashing.
-2. **Four Independent Eligibility Rules**:
-   - Business Registration (`>= 12 months`)
-   - Applicant Age (`21 to 65 years`)
-   - Turnover Ratio (`Loan <= 10x monthly turnover`)
-   - Productive Loan Purpose Check
-3. **Qualitative Risk & Fraud Anomaly Detection**:
-   - Two-factor confidence scoring (Self-consistency + Explanation quality)
-   - Identity and bank statement name mismatch detection
-4. **Anti-Hallucination Letter Guardrail (`validate_letter`) [Deliverable D4]**:
-   - Verifies every monetary number, operating duration, and date claim before sending.
-   - Blocks automated dispatch and flags letters for human review if any claim cannot be verified.
-5. **Streamlit Human-in-the-Loop Dashboard [Deliverable D6]**:
-   - **Loan Officer Review Queue**: Real-time queue of escalated applications with structured briefings and 1-click decisions (`Approve`, `Decline`, `Request More Info`).
-   - **Admin Intelligence & Calibration**: Automated tracking of `% Handled Autonomously`, `% Escalated`, and **`Human Override Rate`**.
-   - **Guardrails & Simulation Sandbox**: Interactive testing suite for deliberate failure injection, PDF edge cases, and fraud detection.
+FlowMind processes small-business loan applications, handles straightforward
+high-confidence cases autonomously and escalates uncertain or complex cases to
+human loan officers.
 
----
+The system combines deterministic eligibility rules, qualitative risk
+classification, document checks, factual letter validation and a Streamlit
+human-review dashboard.
 
-## 🛠️ Project Structure
+FlowMind is an educational prototype, not a production credit-scoring system.
 
+## Main Features
+
+- PDF intake using PyMuPDF
+- Detection of scanned and corrupted documents
+- Operating-duration cross-validation
+- Four independent eligibility rules
+- Low, Medium and High qualitative risk classification
+- Identity and bank-account name consistency checking
+- Confidence-based decision routing
+- Conditional approval and decline-letter generation
+- Anti-hallucination letter validation
+- Human escalation briefings
+- Streamlit loan-officer dashboard
+- FastAPI application endpoints
+- SQLite development database with Supabase-compatible access
+- Calibration and human-override metrics
+- 36 automated tests
+- 20-application Day 8 stress test
+
+## Decision Outcomes
+
+FlowMind routes each application to one of three primary outcomes:
+
+- `auto_approved`
+- `auto_declined`
+- `escalated`
+
+Escalated applications can later become:
+
+- `human_approved`
+- `human_declined`
+- `human_info_requested`
+
+## Project Structure
+
+```text
+flowmind/
+|-- api/
+|   `-- main.py
+|-- config/
+|   `-- thresholds.py
+|-- dashboard/
+|   |-- app.py
+|   `-- styles.css
+|-- db/
+|   |-- database.py
+|   |-- flowmind.db
+|   `-- seed_data.py
+|-- docs/
+|   |-- architecture.md
+|   |-- decision_logic.md
+|   |-- eligibility_and_letters.md
+|   |-- intake_pipeline.md
+|   |-- risk_and_confidence.md
+|   |-- user_guide.md
+|   `-- deliverables/
+|       |-- D4_autonomous_action_outputs.md
+|       |-- D6_streamlit_dashboard.md
+|       |-- D7_integration_loop.md
+|       `-- D7_stress_test_results.md
+|-- src/
+|   |-- actions/
+|   |-- briefing/
+|   |-- eligibility/
+|   |-- intake/
+|   |-- risk/
+|   |-- models.py
+|   `-- pipeline.py
+|-- tests/
+|   |-- stress_test_day8.py
+|   |-- test_api_endpoints.py
+|   |-- test_calibration.py
+|   |-- test_day7_challenges.py
+|   |-- test_eligibility.py
+|   |-- test_fraud_detection.py
+|   |-- test_full_integration.py
+|   |-- test_intake_edge_cases.py
+|   |-- test_letter_validator.py
+|-- scripts/
+|   `-- manual_letters_demo.py
+|-- requirements.txt
+`-- README.md
 ```
-Flowmind/
-├── config/
-│   ├── __init__.py
-│   └── thresholds.py              # Operational limits & calibration telemetry
-├── db/
-│   ├── __init__.py
-│   ├── database.py                # Supabase client + SQLite fallback
-│   └── seed_data.py               # Sample SME applications
-├── src/
-│   ├── models.py                  # Pydantic schemas
-│   ├── intake/
-│   │   └── pdf_extractor.py       # Resilient PyMuPDF parser
-│   ├── eligibility/
-│   │   └── rules.py               # 4 testable eligibility criteria
-│   ├── risk/
-│   │   ├── classifier.py          # Risk & 2-factor confidence
-│   │   └── fraud_detector.py      # Identity mismatch detector
-│   ├── actions/
-│   │   ├── letter_generator.py    # Approval & decline notices
-│   │   └── letter_validator.py    # Anti-hallucination guardrail (validate_letter)
-│   ├── briefing/
-│   │   └── briefing_generator.py  # Structured loan officer briefings
-│   └── pipeline.py                # End-to-end orchestrator
-├── dashboard/
-│   ├── app.py                     # Streamlit application
-│   └── styles.css                 # Custom theme styling
-├── docs/
-│   ├── decision_logic.md          # D1 Decision logic
-│   ├── edge_cases.md              # Edge cases & fault tolerance report
-│   └── deliverables/
-│       ├── D4_autonomous_action_outputs.md
-│       └── D6_streamlit_dashboard.md
-├── tests/
-│   ├── test_letter_validator.py   # D4 Deliberate failure tests
-│   ├── test_intake_edge_cases.py  # Scanned & truncated PDF tests
-│   ├── test_fraud_detection.py    # Fraud & name mismatch tests
-│   ├── test_eligibility.py        # 4 criteria tests
-│   └── test_calibration.py        # Calibration telemetry tests
-├── requirements.txt
-└── README.md
-```
-
----
-
-## 🧪 Running Automated Tests
-
-Run the complete test suite:
-```bash
-python -m pytest tests/ -v
-```
-
-All 18 tests execute in `< 0.5s` and validate:
-- Anti-hallucination letter guardrail and deliberate failure injection (`test_deliberate_failure_injected_operating_tenure`)
-- Scanned and truncated PDF intake edge cases (`test_scanned_image_only_pdf_fails_gracefully`, `test_truncated_corrupt_pdf_fails_gracefully`)
-- Name mismatch fraud detection (`test_fraudulent_name_mismatch_application`)
-- Eligibility boundary conditions and calibration telemetry.
-
----
-
-## 🖥️ Launching the Streamlit Dashboard
-
-Run the Streamlit application:
-```bash
-streamlit run dashboard/app.py
-```
-
-Open `http://localhost:8501` in your browser to interact with:
-1. **Loan Officer Queue**: Review briefings and decide on escalated applications.
-2. **Admin & Metrics**: Track autonomous rate, escalation rate, and human override telemetry.
-3. **Guardrails & Simulation Lab**: Test edge cases and injected hallucinations in real time.

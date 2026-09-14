@@ -87,7 +87,7 @@ if app_mode == "📋 Loan Officer Queue":
     escalated_items = rows.data or []
 
     # Top summary metrics
-    col1, col2, col3 = st.columns(3)
+    fcol1, fcol2, fcol3 = st.columns(3)
     col1.metric("Pending In Queue", len(escalated_items), delta=f"{len(escalated_items)} to review", delta_color="inverse")
     total_requested = sum(float(r.get("loan_amount", 0)) for r in escalated_items)
     col2.metric("Queue Volume", f"₦{total_requested:,.2f}")
@@ -139,21 +139,21 @@ if app_mode == "📋 Loan Officer Queue":
                 bcol1, bcol2, bcol3 = st.columns(3)
                 
                 # 1. Approve Button
-                if bcol1.button("✅ Approve Application", key=f"a{app_id}", use_container_width=True, type="primary"):
+                if bcol1.button("✅ Approve Application", key=f"a{app_id}", width="stretch", type="primary"):
                     save_human_decision(app_id, "human_approved", officer_id, officer_notes)
                     update_status(app_id, "human_approved")
                     st.success(f"Application {app_id} approved by {officer_id}!")
                     st.rerun()
 
                 # 2. Decline Button
-                if bcol2.button("❌ Decline Application", key=f"d{app_id}", use_container_width=True):
+                if bcol2.button("❌ Decline Application", key=f"d{app_id}", width="stretch"):
                     save_human_decision(app_id, "human_declined", officer_id, officer_notes)
                     update_status(app_id, "human_declined")
                     st.warning(f"Application {app_id} declined by {officer_id}.")
                     st.rerun()
 
                 # 3. Request More Info Button
-                if bcol3.button("❓ Request More Info", key=f"i{app_id}", use_container_width=True):
+                if bcol3.button("❓ Request More Info", key=f"i{app_id}", width="stretch"):
                     save_human_decision(app_id, "human_info_requested", officer_id, officer_notes)
                     update_status(app_id, "human_info_requested")
                     st.info(f"Information request dispatched for {app_id}.")
@@ -168,7 +168,7 @@ if app_mode == "📋 Loan Officer Queue":
             df_decided = pd.DataFrame(decided_res.data)[
                 ["id", "business_name", "loan_amount", "status", "officer_id", "is_override", "updated_at"]
             ]
-            st.dataframe(df_decided, use_container_width=True)
+            st.dataframe(df_decided, width="stretch")
 
 
 # =========================================================================
@@ -255,7 +255,7 @@ elif app_mode == "📊 Admin & Metrics":
         all_apps = supabase.table("applications").select("*").execute()
         if all_apps.data:
             df_all = pd.DataFrame(all_apps.data)
-            st.dataframe(df_all, use_container_width=True)
+            st.dataframe(df_all, width="stretch")
             
             # Export CSV button
             csv_buffer = io.StringIO()

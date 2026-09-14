@@ -224,7 +224,7 @@ Outcome: passed.
 
 ### Finding 2: Manual Test Blocks Normal Collection
 
-- **Problem:** `tests/test_letters_manual.py` can wait for the local Ollama
+- **Problem:** `scripts/manual_letters_demo.py` can wait for the local Ollama
   model during pytest collection.
 - **Likely cause:** Model-dependent operations occur during module import.
 - **Recommendation:** Convert the file into explicit test functions and mark
